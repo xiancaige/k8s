@@ -1,0 +1,48 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  labels: 
+    app: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    stdin: true
+    tty: true
+    securityContext:                     
+      runAsUser: 0                      #设置以ROOT用户运行容器
+      privileged: true 
+    volumeMounts:
+    - name: config
+      mountPath: "/etc/nginx/nginx.conf"
+    ports:
+    - containerPort: 80
+      protocol: TCP
+    - containerPort: 443
+      protocol: TCP
+  volumes:
+    - name: config
+      hostPath:
+        path: /root/k8s/dl-nginx/nginx-zzz.conf
+  nodeSelector: # 这里就设置了节点亲和
+    disktype: ams
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+  - name: tcp
+    protocol: TCP
+    port: 80
+    nodePort: 30180
+  - name: son
+    protocol: TCP
+    port: 443
+    targetPort: 32443
+  type: NodePort
