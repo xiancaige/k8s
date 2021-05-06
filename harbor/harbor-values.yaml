@@ -1,0 +1,36 @@
+expose:
+  type: ingress
+  tls:
+    enabled: true
+  ingress:
+    hosts:
+      core: www.xcggame.com/harbor
+      notary: www.xcggame.com/notary
+    annotations:
+      kubernetes.io/ingress.class: "nginx"
+      ingress.kubernetes.io/ssl-redirect: "true"
+      ingress.kubernetes.io/proxy-body-size: "0"
+        
+externalURL: http://www.xcggame.com/harbor
+
+persistence:
+  enabled: false
+  #persistentvolumeclaim:
+  #  registry:
+  #    storageclass: "harbor-registry"
+  #    size: 10Gi
+  #  chartmuseum:
+  #    storageclass: "harbor-chartmuseum"
+  #    size: 5Gi
+  #  jobservice:
+  #    storageclass: "harbor-jobservice"
+  #   size: 1Gi
+  #  database:
+  #    storageclass: "harbor-database"
+  #    size: 5Gi
+  #  redis:
+  #    storageclass: "harbor-redis"
+  #    size: 1Gi
+  #  trivy:
+  #    storageclass: "harbor-trivy"
+  #    size: 5Gi

@@ -1,0 +1,9 @@
+#dnsPolicy: ClusterFirstWithHostNet
+#hostNetwork: true
+#type: ClusterIP
+#kind: DaemonSet
+#daemonset:
+#  useHostPort: true
+service:
+  nodePorts:
+    https: 30443
