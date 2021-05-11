@@ -64,4 +64,8 @@ EOF
 
 chown 1000 /data/kubernetes/jenkins_home/.m2
 
+kubectl create namespace ci
+
+kubectl create clusterrolebinding jenkins-admin --clusterrole=admin --serviceaccount=ci:default
+
 echo "-------init end------"

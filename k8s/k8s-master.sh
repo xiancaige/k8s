@@ -36,7 +36,7 @@ EOF
 
 kubeadm init --config=kubeadm-config.yaml --ignore-preflight-errors=all
 
-kubectl taint node master node-role.kubernetes.io/master-
+#kubectl taint node master node-role.kubernetes.io/master-
 
 echo "-----------kube config------------"
 
