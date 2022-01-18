@@ -130,7 +130,7 @@ spec:
         - key: kubernetes.io/hostname
           operator: In
           values:
-          - tx # 这里我们使用node01节点，该节点有/data/vol1路径
+          - tx2 # 这里我们使用node01节点，该节点有/data/vol1路径
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
