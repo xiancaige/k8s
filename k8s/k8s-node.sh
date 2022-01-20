@@ -8,6 +8,15 @@ echo "公网ip"$PUBLIC_IP
 
 
 echo "------------init env--------"
+# 设置dns
+#rm -rf /etc/resolv.conf
+#cat > /etc/resolv.conf <<EOF
+#nameserver 8.8.8.8
+#nameserver 114.114.114.114
+#EOF
+echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+echo "nameserver 114.114.114.114" >> /etc/resolv.conf
+
 # 关闭selinux
 setenforce 0
 
