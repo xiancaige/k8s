@@ -77,6 +77,7 @@ systemctl restart systemd-journald
 modprobe br_netfilter
 
 # step2
+mkdir -p /etc/sysconfig/modules/
 cat > /etc/sysconfig/modules/ipvs.modules <<EOF
 #!/bin/bash
 modprobe -- ip_vs
@@ -89,10 +90,8 @@ EOF
 # step3
 chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack_ipv4
 
-sed -i "s@http://deb.debian.org@http://mirrors.aliyun.com@g" /etc/apt/sources.list\
 apt-get update
 # step 1: 安装必要的一些系统工具
-apt-get install -y yum-utils device-mapper-persistent-data lvm2
 apt-get -y install docker-ce
 # Step 4: 开启Docker服务
 systemctl start docker
@@ -118,28 +117,21 @@ systemctl daemon-reload && systemctl restart docker && systemctl enable docker
 iptables -F
 
 echo "------------yum k8s--------"
+apt-get install -y apt-transport-https ca-certificates curl
+curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
 
-# 添加源
-cat <<EOF > /etc/yum.repos.d/kubernetes.repo
-[kubernetes]
-name=Kubernetes
-baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
-EOF
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
-
-
+apt-get update
 # 安装kubelet、kubeadm、kubectl
-apt-get install -y kubelet-1.20.5 kubeadm-1.20.5 kubectl-1.20.5
+apt-get install -y kubelet=1.20.5-00 kubeadm=1.20.5-00 kubectl=1.20.5-00
 
 # 设置为开机自启
 systemctl enable kubelet 
 
 echo "------------change network--------"
 
+mkdir -p /etc/sysconfig/network-scripts/
 cat > /etc/sysconfig/network-scripts/ifcfg-eth0:1 <<EOF
 BOOTPROTO=static
 DEVICE=eth0:1
@@ -154,6 +146,7 @@ systemctl restart network
 
 echo "------------change kubeadm.conf--------"
 
+mkdir -p /usr/lib/systemd/system/kubelet.service.d/
 cat > /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf <<EOF 
 # Note: This dropin only works with kubeadm and kubelet v1.11+
 [Service]
