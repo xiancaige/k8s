@@ -1,10 +1,12 @@
+echo "-----------rmfile------------"
+rm -rf  $HOME/.config
+rm -rf /root/.kube
+rm -rf  /etc/kubernetes/*
+rm -rf /etc/cni/net.d
 
 echo "-----------reset------------"
 kubeadm reset -f
-echo "-----------rmfile------------"
-rm -rf  $HOME/.config
-rm -rf  /etc/kubernetes/*
-rm -rf /etc/cni/net.d
+
 echo "-----------reset-net------------"
 ifconfig cni0 down
 ip link delete cni0
