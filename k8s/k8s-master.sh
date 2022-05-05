@@ -12,10 +12,15 @@ echo "内网ip"$PRIVATE_IP
 echo "------------start------------"
 
 cat > kubeadm-config.yaml <<EOF 
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+nodeRegistration:
+  criSocket: /run/containerd/containerd.sock
+---
 imageRepository: registry.aliyuncs.com/google_containers
-apiVersion: kubeadm.k8s.io/v1beta2
+apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
-kubernetesVersion: v1.20.5
+kubernetesVersion: v1.23.5
 apiServer:
   certSANs:    #填写所有kube-apiserver节点的hostname、IP、VIP
   - master    #请替换为hostname
@@ -26,15 +31,15 @@ controlPlaneEndpoint: $PUBLIC_IP:6443 #替换为公网IP
 networking:
   podSubnet: 10.244.0.0/16
   serviceSubnet: 10.96.0.0/12
---- 将默认调度方式改为ipvs
-apiVersion: kubeproxy-config.k8s.io/v1alpha1
+---
+apiVersion: kubeproxy-config.k8s.io/v1beta1 
 kind: KubeProxyConfiguration
 featureGates:
   SupportIPVSProxyMode: true
 mode: ipvs
 EOF
 
-kubeadm init --config=kubeadm-config.yaml --ignore-preflight-errors=all
+kubeadm init --config=kubeadm-config.yaml --ignore-preflight-errors=all 
 
 #kubectl taint node master node-role.kubernetes.io/master-
 
@@ -91,7 +96,7 @@ spec:
     - --service-cluster-ip-range=10.96.0.0/12
     - --tls-cert-file=/etc/kubernetes/pki/apiserver.crt
     - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
-    image: registry.aliyuncs.com/google_containers/kube-apiserver:v1.20.5
+    image: registry.aliyuncs.com/google_containers/kube-apiserver:v1.23.5
     imagePullPolicy: IfNotPresent
     livenessProbe:
       failureThreshold: 8

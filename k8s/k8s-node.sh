@@ -102,28 +102,15 @@ chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipv
 yum install -y yum-utils device-mapper-persistent-data lvm2
 # Step 2: 添加软件源信息
 yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-# Step 3: 更新并安装Docker-CE
+# Step 3: 更新并安装containerd
 yum makecache fast
-yum -y install docker-ce
-# Step 4: 开启Docker服务
-systemctl start docker
+yum -y install containerd 
 
-# 创建 `/etc/docker`目录
-mkdir -p /etc/docker
+# 应用配置
+cp -f containerd-config.toml /etc/containerd/config.toml
 
-# 配置 `daemon`
-cat > /etc/docker/daemon.json << EOF
-{
-  "exec-opts": ["native.cgroupdriver=systemd"],
-  "log-driver": "json-file",
-  "log-opts": {
-    "max-size": "100m"
-  }
-}
-EOF
-
-# 启动docker
-systemctl daemon-reload && systemctl restart docker && systemctl enable docker
+# 启动containerd 
+systemctl daemon-reload && systemctl restart containerd  && systemctl enable containerd 
 
 # 刷新iptabels
 iptables -F
@@ -143,7 +130,7 @@ EOF
 
 
 # 安装kubelet、kubeadm、kubectl
-yum install -y kubelet-1.20.5 kubeadm-1.20.5 kubectl-1.20.5
+yum install -y kubelet-1.23.5 kubeadm-1.23.5 kubectl-1.23.5
 
 # 设置为开机自启
 systemctl enable kubelet 
@@ -167,7 +154,8 @@ echo "------------change kubeadm.conf--------"
 cat > /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf <<EOF 
 # Note: This dropin only works with kubeadm and kubelet v1.11+
 [Service]
-Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"
+Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf \
+--container-runtime=remote --container-runtime-endpoint=unix:///run/containerd/containerd.sock"
 Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
 # This is a file that "kubeadm init" and "kubeadm join" generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically
 EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
