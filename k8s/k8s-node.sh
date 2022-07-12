@@ -151,11 +151,10 @@ systemctl restart network
 
 echo "------------change kubeadm.conf--------"
 
-cat > /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf <<EOF 
+cat > /etc/systemd/system/kubelet.service.d/10-kubeadm.conf <<EOF 
 # Note: This dropin only works with kubeadm and kubelet v1.11+
 [Service]
-Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf \
---container-runtime=remote --container-runtime-endpoint=unix:///run/containerd/containerd.sock"
+Environment="KUBELET_EXTRA_ARGS=--container-runtime=remote --runtime-request-timeout=15m --container-runtime-endpoint=unix:///run/containerd/containerd.sock"
 Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
 # This is a file that "kubeadm init" and "kubeadm join" generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically
 EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
